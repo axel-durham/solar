@@ -1,12 +1,10 @@
 #Renewable Energy Technology
-#Pwer Function
+#Power (and Irradiance) Function
 
 import math as m
-# import numpy as np
 import renew as rn
 
 def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff):
-	#Figure 1: Irradiance for Austin and Total System Power Delivery vs Time of Day, Sunny Day, Dec. 21
 	irradiance = []
 	power = []
 	for N in range(1,366):
@@ -24,6 +22,7 @@ def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 			# print('zenith angle:', theta_z)
 			alpha = rn.Altitude(delta, lat, omega)
 
+			#this section accounts for the inverse trig function looking in the wrong quadrant under certain conditions
 			gamma_s = rn.SolarAzimuth(delta, omega, alpha)
 			if N >= 90 and N <= 266 and N != 1 and gamma_s < gamma_s_old:
 				if gamma_s <= 0:
@@ -32,7 +31,6 @@ def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 					gamma_s_mod = 180 - gamma_s
 			else:
 				gamma_s_mod = gamma_s
-
 			# print('gamma_s:', gamma_s)
 			# print('gamma_s:', gamma_s_mod)
 

@@ -42,6 +42,16 @@ def DayOfTheYear(date):
 	days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 	return sum(days_in_months[0:date[0]-1]) + date[1]
 
+def dateToWords(date):
+	"""
+	This function converts a date fronm a 'mm/dd' format to a 'Month dd' format
+	Intended for use on labels for plots
+	"""
+	date = date.split('/')
+	month_words = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug', 'Sep.', 'Oct.', 'Nov.', 'Dec.']
+
+	return month_words[int(date[0])-1] + ' ' + date[1]
+
 def I_0(N):
 	"""
 	This function calculate the daily solar constant as a function of the the day of the year
@@ -79,6 +89,9 @@ def LocalToSolarTime(std_time, long_std, long_loc, N):
 		ET.append(a[j]*m.sin((j+1)*tau) + b[j]*m.cos((j+1)*tau))
 	ET_tot_decimal = sum(ET)/60
 
+	if N >= 69 and N < 307:
+		std_time = std_time - 1
+
 	solar_time_decimal = std_time + 4/60*(long_std - long_loc) + ET_tot_decimal
 	return solar_time_decimal
 
@@ -104,6 +117,10 @@ def SolarToLocalTime(solar_time, long_std, long_loc, N):
 	ET_tot_decimal = sum(ET)/60
 
 	local_time_decimal = TimeMinutesToDecimal(solar_time) - 4/60*(LatLong(long_std) - LatLong(long_loc)) - ET_tot_decimal
+	
+	if N < 69 or N >= 307:
+		local_time_decimal = local_time_decimal + 1
+
 	return local_time_decimal
 
 def Declination(N):
