@@ -1,5 +1,6 @@
 #Renewable Energy Technology
 #Power (and Irradiance) Function
+#Calculates power for every 5 minute interval throughout the year
 
 import math as m
 import renew as rn
@@ -7,12 +8,16 @@ import renew as rn
 def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff):
 	irradiance = []
 	power = []
+	irradiance_ratio = []
+	theta_i_array = []
 	for N in range(1,366):
 		# print('day:', N)
 		I_0 = rn.I_0(N)
 		delta = rn.Declination(N)
 		irradiance.append([])
 		power.append([])
+		irradiance_ratio.append([])
+		theta_i_array.append([])
 		for time in range(0,24*12+1):
 			solar_time = rn.LocalToSolarTime(time/12, long_std, long_loc, N)
 			# print('solar time:', solar_time)
@@ -35,6 +40,7 @@ def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 			# print('gamma_s:', gamma_s_mod)
 
 			theta_i = rn.AngleOfIncidence(alpha, beta, gamma, gamma_s)
+			theta_i_array[N-1].append(theta_i)
 			# print('angle of incidence:', theta_i)
 
 			if theta_z > 90:
@@ -53,6 +59,7 @@ def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 			I_c_d = 0	
 			I_c_d = rn.I_c_d(tau_d, I_0, theta_z, beta)
 			# print('I_c_d:', I_c_d)
+			irradiance_ratio[N-1].append(I_c_b/I_c_d) #calculates the ratio of beam irradiance to diffuse irradiance for bullet 4 of case 1
 
 			if alpha < 0:
 				irradiance[N-1].append(0)
@@ -62,4 +69,4 @@ def YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 
 			gamma_s_old = gamma_s
 		# print(irradiance[N-1])
-	return irradiance, power
+	return irradiance, power, irradiance_ratio, theta_i_array

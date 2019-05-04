@@ -16,30 +16,32 @@ area_panel = 1.6236 # m^2
 n_panels = 960
 eff = 0.157
 
-irradiance, power = pwr.YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
+########## BEGIN Bullets 1, 2, & 3 ##########
+irradiance, power, irradiance_ratio, theta_i_array = pwr.YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 irradiance = np.array(irradiance)
 scaled_power = np.array(power) / 1000
 
 gamma = 0
-irradiance_gamma0, power_gamma0 = pwr.YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
+irradiance_gamma0, power_gamma0, irradiance_ratio_gamma0, theta_i_array_gamma0 = pwr.YearlyPower(lat, long_std, long_loc, beta, gamma, area_panel, n_panels, eff)
 irradiance_gamma0 = np.array(irradiance_gamma0)
 scaled_power_gamma0 = np.array(power_gamma0) / 1000
 
-X = []
+#Creating x-axis for time of day
+X1 = []
 for hour in range(0,24*12+1):
-	X.append(hour/12)
+	X1.append(hour/12)
 
 plt.rcParams.update({'font.size': 16})
 
-f1 = plt.figure()
+f1 = plt.figure(1)
 ax1 = plt.subplot(111)
 
 #Irradiance
 color = 'tab:blue'
 date = '12/21'
-ax1.plot(X, irradiance[rn.DayOfTheYear(date)-1], color=color, linewidth=3, label=rn.dateToWords(date))
+ax1.plot(X1, irradiance[rn.DayOfTheYear(date)-1], color=color, linewidth=3, label=rn.dateToWords(date))
 date = '06/21'
-ax1.plot(X, irradiance[rn.DayOfTheYear(date)-1], color=color, linestyle='dashed', linewidth=3, label=rn.dateToWords(date))
+ax1.plot(X1, irradiance[rn.DayOfTheYear(date)-1], color=color, linestyle='dashed', linewidth=3, label=rn.dateToWords(date))
 ax1.set_xlabel('Local Time [hours]', fontsize=18)
 ax1.set_ylabel('Irradiance [W/m^2]', color=color, fontsize=18)
 ax1.tick_params(axis='y', labelcolor=color)
@@ -51,11 +53,11 @@ ax2 = ax1.twinx()
 
 #Power
 color = 'tab:red'
-date = '03/26'
-ax2.plot(X, scaled_power[rn.DayOfTheYear(date)-1], color=color, linewidth=3, label=rn.dateToWords(date)+', $\gamma$=46')
+date = '12/21'
+ax2.plot(X1, scaled_power[rn.DayOfTheYear(date)-1], color=color, linewidth=3, label=rn.dateToWords(date)+', $\gamma$=46')
 date = '06/21'
-ax2.plot(X, scaled_power[rn.DayOfTheYear(date)-1], color=color, linestyle='dashed', linewidth=3, label=rn.dateToWords(date)+', $\gamma$=46')
-ax2.plot(X, scaled_power_gamma0[rn.DayOfTheYear(date)-1], color=color, linestyle='dotted', linewidth=3, label=rn.dateToWords(date)+', $\gamma$=0')
+ax2.plot(X1, scaled_power[rn.DayOfTheYear(date)-1], color=color, linestyle='dashed', linewidth=3, label=rn.dateToWords(date)+', $\gamma$=46')
+ax2.plot(X1, scaled_power_gamma0[rn.DayOfTheYear(date)-1], color=color, linestyle='dotted', linewidth=3, label=rn.dateToWords(date)+', $\gamma$=0')
 ax2.set_ylabel('Power [kW]', color=color, fontsize=18)
 ax2.tick_params(axis='y', labelcolor=color)
 ax2.set_ylim((0,250))
@@ -67,3 +69,59 @@ plt.xlim(0,24)
 
 f1.tight_layout()
 f1.show()
+########## END of Bullets 1, 2, & 3 ##########
+
+########## BEGIN Bullet 4 ##########
+f2 = plt.figure(2)
+ax3 = plt.subplot(111)
+
+date = '06/21'
+ax3.plot(X1, irradiance_ratio[rn.DayOfTheYear(date)-1])
+ax3.set_xlabel('Local Time [hours]', fontsize=18)
+ax3.set_ylabel('I_c_b / I_c_d', fontsize=18)
+
+plt.title('Ratio of Beam to Diffuse Irradiance (' + date + ')', fontsize=20)
+plt.xlim(0,24)
+
+f2.tight_layout()
+f2.show()
+########## END Bullet 4 ##########
+
+########## BEGIN Bullet 5 ##########
+theta_i_at_noon = []
+for day in theta_i_array:
+	theta_i_at_noon.append(day[145])
+
+daily_energy_production = []
+for day in power:
+	daily_energy_production.append(np.trapz(day, dx=1/12))
+daily_energy_production = np.array(daily_energy_production)
+scaled_daily_energy_production = np.array(daily_energy_production) / 1e6
+
+#Creating x-axis for day of the year
+X2 = []
+for day in range(1,366):
+	X2.append(day)
+
+f3 = plt.figure(3)
+ax4 = plt.subplot(111)
+
+ax4.plot(X2, theta_i_at_noon)
+ax4.set_xlabel('Day of the Year', fontsize=18)
+ax4.set_ylabel('Angle of Incidence at Noon', fontsize=18)
+
+plt.title('Angle of Incidence at Noon vs Day of The Year')
+plt.xlim(1,365)
+
+ax5 = ax4.twinx()
+
+ax5.plot(X2, scaled_daily_energy_production)
+ax5.set_xlabel('Day of the Year', fontsize=18)
+ax5.set_ylabel('Daily Energy Production (MWh)', fontsize=18)
+
+plt.title('Daily Energy Production vs Day of The Year')
+plt.xlim(1,365)
+
+f3.tight_layout()
+f3.show()
+########## END Bullet 5 ##########
