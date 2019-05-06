@@ -89,6 +89,7 @@ def LocalToSolarTime(std_time, long_std, long_loc, N):
 		ET.append(a[j]*m.sin((j+1)*tau) + b[j]*m.cos((j+1)*tau))
 	ET_tot_decimal = sum(ET)/60
 
+	#DST correction
 	if N >= 69 and N < 307:
 		std_time = std_time - 1
 
