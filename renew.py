@@ -117,7 +117,7 @@ def SolarToLocalTime(solar_time, long_std, long_loc, N):
 		ET.append(a[j]*m.sin((j+1)*tau) + b[j]*m.cos((j+1)*tau))
 	ET_tot_decimal = sum(ET)/60
 
-	local_time_decimal = TimeMinutesToDecimal(solar_time) - 4/60*(LatLong(long_std) - LatLong(long_loc)) - ET_tot_decimal
+	local_time_decimal = TimeMinutesToDecimal(solar_time) - 4/60*(long_std - long_loc) - ET_tot_decimal
 	
 	if N < 69 or N >= 307:
 		local_time_decimal = local_time_decimal + 1

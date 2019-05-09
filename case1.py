@@ -6,6 +6,7 @@ import numpy as np
 import renew as rn
 import power as pwr
 import matplotlib.pyplot as plt
+import csv
 
 lat = 30.2672
 long_std = 90
@@ -82,6 +83,7 @@ ax3.plot(X1, irradiance_ratio_horiz[rn.DayOfTheYear(date)-1], color=color, linew
 ax3.set_xlabel('Local Time [hours]', fontsize=18)
 ax3.set_ylabel('I_c_b / I_c_d', color=color, fontsize=18)
 ax3.tick_params(axis='y', labelcolor=color)
+ax3.grid()
 
 plt.title('Ratio of Beam to Diffuse Irradiance for a Flat Surface (' + date + ')', fontsize=20)
 plt.xlim(0,24)
@@ -92,7 +94,7 @@ f2.show()
 
 ########## BEGIN Bullet 5 ##########
 theta_i_at_noon = []
-for day in range(1, len(theta_i_array)+1):
+for day in range(1, len(theta_i_array)+1):	
 	if day >= 69 and day <307: #counteracts DST
 		theta_i_at_noon.append(theta_i_array[day-1][145+12])
 	else:
@@ -118,6 +120,7 @@ ax4.plot(X2, theta_i_at_noon, color=color, linewidth=3)
 ax4.set_xlabel('Day of the Year', fontsize=18)
 ax4.set_ylabel('Angle of Incidence at Noon', color=color, fontsize=18)
 ax4.tick_params(axis='y', labelcolor=color)
+ax4.grid()
 
 ax5 = ax4.twinx()
 
@@ -134,3 +137,36 @@ plt.xlim(1,365)
 f3.tight_layout()
 f3.show()
 ########## END Bullet 5 ##########
+
+########## BEGIN Bullet 6 ##########
+file = open('data.csv')
+reader = csv.reader(file)
+PEC_power = []
+for row in reader:
+	PEC_power.append(row[2])
+PEC_power.reverse()
+PEC_power.pop()
+PEC_power = [float(x) for x in PEC_power]
+PEC_power = [0 if x<0 else x for x in PEC_power]
+
+f4 = plt.figure(4)
+ax6 = plt.subplot(111)
+
+color = 'tab:blue'
+date = '03/26'
+ax6.plot(X1, scaled_power[rn.DayOfTheYear(date)-1], color=color, linewidth=3, label='Model')
+color= 'tab:green'
+ax6.plot(X1, PEC_power, color=color, linewidth=3, label='PEC')
+ax6.set_xlabel('Local Time [hours]', fontsize=18)
+ax6.set_ylabel('Power [kW]', fontsize=18)
+ax6.tick_params(axis='y')
+ax6.set_ylim((0,250))
+ax6.legend(loc='upper left')
+ax6.grid()
+
+plt.title('Model Power Production vs PEC Power (' + date + ')', fontsize=20)
+plt.xlim(0,24)
+
+f4.tight_layout()
+f4.show()
+########## END Bullet 6 ##########
